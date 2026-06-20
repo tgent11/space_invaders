@@ -26,7 +26,7 @@ export const ENEMY_MOVE_INTERVAL = 800;
 // Power-up constants
 export const POWERUP_SIZE = 24;
 export const POWERUP_SPEED = 2;
-export const POWERUP_DROP_CHANCE = 0.10;
+export const POWERUP_DROP_CHANCE = 0.03; // ~3% chance to drop
 export const POWERUP_DURATION = 10000;
 
 // Game settings

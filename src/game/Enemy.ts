@@ -11,6 +11,7 @@ export class Enemy {
   alive = true;
   private animFrame = 0;
   private animTimer = 0;
+  private flashTimer = 0;
 
   constructor(x: number, y: number, type: EnemyType, hp: number) {
     this.x = x;
@@ -24,6 +25,7 @@ export class Enemy {
 
   takeDamage(amount: number): boolean {
     this.health -= amount;
+    this.flashTimer = 150; // Flash for 150ms on hit
     if (this.health <= 0) {
       this.alive = false;
       return true;
@@ -37,6 +39,10 @@ export class Enemy {
       this.animFrame = (this.animFrame + 1) % 2;
       this.animTimer = 0;
     }
+    
+    if (this.flashTimer > 0) {
+      this.flashTimer -= deltaTime;
+    }
   }
 
   render(ctx: CanvasRenderingContext2D): void {
@@ -45,6 +51,14 @@ export class Enemy {
     const { x, y, width, height, type, animFrame } = this;
     const cx = x + width / 2;
     const cy = y + height / 2;
+    const isFlashing = this.flashTimer > 0;
+
+    // Draw flash overlay if hit
+    if (isFlashing) {
+      ctx.save();
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+      ctx.fillRect(x - 2, y - 2, width + 4, height + 4);
+    }
 
     switch (type) {
       case EnemyType.Scout:
@@ -56,6 +70,10 @@ export class Enemy {
       case EnemyType.Tank:
         this.renderTank(ctx, cx, cy, animFrame);
         break;
+    }
+
+    if (isFlashing) {
+      ctx.restore();
     }
 
     if (this.maxHealth > 1) {
