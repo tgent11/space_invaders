@@ -146,7 +146,9 @@ export class Game {
     for (const bullet of this.bullets) {
       bullet.update(deltaTime);
     }
-    this.bullets = this.bullets.filter(b => b.active);
+    // Bullets are filtered in checkCollisions() for player bullets
+    // Filter out non-player bullets that are inactive
+    this.bullets = this.bullets.filter(b => b.active || !b.isPlayerBullet);
   }
 
   private updateEnemies(currentTime: number): void {
@@ -223,7 +225,7 @@ export class Game {
 
         if (checkCollision(bullet, enemy)) {
           const killed = enemy.takeDamage(bullet.damage);
-          bullet.active = false;
+          bullet.active = false; // Consume bullet immediately
 
           if (killed) {
             this.score += ENEMY_POINTS[enemy.type];
@@ -236,10 +238,13 @@ export class Game {
             }
           }
           this.notifyStateChange();
-          break;
+          break; // Stop at first enemy hit
         }
       }
     }
+    
+    // Remove consumed bullets immediately
+    this.bullets = this.bullets.filter(b => b.active);
   }
 
   private startGame(): void {
