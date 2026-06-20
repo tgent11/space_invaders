@@ -1,11 +1,12 @@
-import { POWERUP_SIZE, POWERUP_SPEED, GAME_HEIGHT } from './types';
+import { POWERUP_SIZE, POWERUP_SPEED, GAME_HEIGHT } from './constants';
 
 export class PowerUp {
   x: number;
   y: number;
   width: number;
   height: number;
-  private speed: number;
+  speed: number;
+  active = true;
   private animFrame = 0;
   private animTimer = 0;
 
@@ -17,12 +18,16 @@ export class PowerUp {
     this.speed = POWERUP_SPEED;
   }
 
-  get active(): boolean {
-    return this.y < GAME_HEIGHT + this.height;
+  collect(): void {
+    this.active = false;
   }
 
-  update(deltaTime: number) {
+  update(deltaTime: number): void {
     this.y += this.speed * (deltaTime / 16);
+    
+    if (this.y > GAME_HEIGHT + this.height) {
+      this.active = false;
+    }
 
     this.animTimer += deltaTime;
     if (this.animTimer > 150) {
@@ -31,33 +36,34 @@ export class PowerUp {
     }
   }
 
-  render(ctx: CanvasRenderingContext2D) {
+  render(ctx: CanvasRenderingContext2D): void {
+    if (!this.active) return;
+
     const { x, y, width, height, animFrame } = this;
     const cx = x + width / 2;
     const cy = y + height / 2;
+    const pulse = animFrame === 0;
 
-    // Glowing star
-    ctx.fillStyle = '#ff0';
+    ctx.fillStyle = pulse ? '#ff0' : '#ffa500';
     ctx.beginPath();
-    ctx.arc(cx, cy, width / 2 - 2, 0, Math.PI * 2);
+    ctx.arc(cx, cy, width / 2, 0, Math.PI * 2);
     ctx.fill();
 
-    // Inner glow
     ctx.fillStyle = '#fff';
     ctx.beginPath();
-    ctx.arc(cx, cy, width / 4, 0, Math.PI * 2);
+    ctx.arc(cx, cy, width / 3, 0, Math.PI * 2);
     ctx.fill();
 
-    // Power symbol
-    ctx.fillStyle = '#00f';
-    ctx.font = 'bold 12px monospace';
+    ctx.strokeStyle = pulse ? '#fff' : '#ff0';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(cx, cy, width / 2 + 2, 0, Math.PI * 2);
+    ctx.stroke();
+
+    ctx.fillStyle = '#f80';
+    ctx.font = 'bold 14px "Courier New", monospace';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText('⚡', cx, cy + 1);
-
-    // Pulsing border
-    ctx.strokeStyle = animFrame === 0 ? '#ff0' : '#fff';
-    ctx.lineWidth = 2;
-    ctx.strokeRect(x + 1, y + 1, width - 2, height - 2);
   }
 }

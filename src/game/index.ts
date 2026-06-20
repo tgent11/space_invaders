@@ -1,3 +1,3 @@
-export { GameEngine } from './GameEngine';
-export type { GameState } from './GameEngine';
-export * from './types';
+export { Game } from './Game';
+export type { GameState } from './Game';
+export * from './constants';
